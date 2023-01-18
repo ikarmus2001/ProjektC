@@ -7,44 +7,90 @@ typedef struct cokolwiek{
     int v;
 } JakasStruktura;
 
-static GtkWidget* fillWarehouse(JakasStruktura js[]) {
+static GtkWidget* fillWarehouse(JakasStruktura* js) {
 
-    // definiuję kolumny, a nie, 
-    // tak jak mówi nazwa funkcji, wypełniam danymi, 
-    // REFACTOR
 
-    GtkCellRenderer* renderer;
-    GtkWidget* resultTreeView = gtk_tree_view_new();
-    int rowsCount = sizeof(js)/sizeof(js[0]);
-    for (int i = 0; i < rowsCount; i++) {
-        renderer = gtk_cell_renderer_text_new();
+    
+    
+    fclose(file);
+
+    // int rowsCount = sizeof(js)/sizeof(js[0]);
+    // for (int i = 0; i < rowsCount; i++) {
         // gtk_tree_view_insert_column_with_attributes(
         //     GTK_TREE_VIEW(resultTreeView),
         //     i,
         //     column
         // );
-    }
+    // }
 
-    return resultTreeView;
+    // return resultTreeView;
 }
 
-static void showItems() {
-
+static void showItems(GtkWidget** ) {
+    GtkWidget* listBox = createListbox();
+    
+    fillListBox(listBox, );
+    gtk_list_box_insert();
 }
 
 // Todo zmienić "read from file" na "read" 
 // - w myśl mvvm
 
-void readFromFile(char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (file == NULL) {
-    // printf("Brak pliku z danymi\n");
-    // return 0;
-    }
-    
-    fclose(file);
+int countLines(FILE* file)
+{
+    // https://stackoverflow.com/a/70708991/14345698
 
-    JakasStruktura js[10] = (JakasStruktura*)malloc(sizeof(JakasStruktura));
-    fillWarehouse(js);
-    showItems();
+    // TODO sprawdzać wielkość pliku zanim odczytam ilość linijek,
+    // pozwala na zmniejszenie wielkości bufora, odciąża pamięć
+    // #include <sys/stat.h> https://stackoverflow.com/a/238609
+
+    char buf[65536];
+    int counter = 0;
+    for(;;)
+    {
+        size_t res = fread(buf, 1, 65536, file);
+        if (ferror(file))
+            return -1;
+
+        int i;
+        for(i = 0; i < res; i++)
+            if (buf[i] == '\n')
+                counter++;
+
+        if (feof(file))
+            break;
+    }
+
+    return counter;
 }
+
+
+void readFromFile() {
+    FILE* filestream = selectFile();
+    int fileLength = countLines(filestream);
+
+    JakasStruktura* js = createStructsFromFile(filestream, fileLength);
+
+    GtkWidget* listBox = fillWarehouse();
+}
+
+JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength){
+    JakasStruktura* js = malloc(fileLength * sizeof(JakasStruktura));
+    JakasStruktura* currentItem;
+    size_t failed = 0;
+    size_t j = 0;
+    for (size_t i = 0; i < fileLength; i++) {
+
+        if ((currentItem = checkLine(currentLine)) != NULL) {
+            js[j] = currentItem;
+            j++;
+        }
+        else
+            failed++;
+    }
+    return js;
+}
+
+    
+    //GtkWidget* listBox = fillWarehouse(js);
+    // showItems(listBox);
