@@ -1,0 +1,21 @@
+KsiążkaZPolskimiZnakami;12;3.99
+Book with a lot of spaces;44;2.99
+OutOfStock;0;1.00
+LiterallyFreeNotebook;99;0.00
+NextLineTriesToMakeScanfError;1;255.12
+;;
+HopeThatReadingWillWork;12;66.72
+ThisBookHas7Parts;3;12.50
+لكن لا بد أن أوضح لك أن كل هذه الأفكار;6;12.5
+ArabicAndNeat;8;11
+NegativeQuantity;-12;5.00
+NegativeValue;7;-2.22
+!LL3G4L_$|gNS;10;7.5
+ 
+AboveWasJustSpace;2;0.1
+TooManyArguments;1;15.55;12
+UnexpectedType;3232.1;55
+71830;80085;AndOtherFunnyThings
+\0;\0;\0
+EscapeSequence\n\"exit(1);11;255.1
+YesILoveDebugging,Why?;-0;-99999999999999.9999

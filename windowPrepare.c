@@ -25,10 +25,9 @@ static GtkWidget* setupButton(char* label) {
 
 
 static void readFromFile_OnClick(GtkWidget *widget, gpointer data) {
-    fprintf(stdout, "Nie wiem właściwie gdzie to się wypisze\n");
-    fprintf(stderr, "STD ERR\n");
-    fflush(stdout);
-    readFromFile();
+    printf("readFromFile Clicked\n");
+    if (readFromFile() != 0)
+        printf("Error in readFromFile\n");
 }
 
 static void addItem_OnClick(GtkWidget *widget, gpointer data) {
