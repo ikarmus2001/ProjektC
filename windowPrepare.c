@@ -67,7 +67,10 @@ void handleError(GError **err) {
 }
 
 static GtkWidget* createMainTreeView() {
+    GtkTreeModel* store = GTK_TREE_MODEL(gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT));
     GtkWidget* result = gtk_tree_view_new();
+    gtk_tree_view_set_model(GTK_TREE_VIEW(result), store);
+    
     return result;
 }
 
