@@ -1,8 +1,6 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-// typedef struct cokolwiek JakasStruktura;
-
 typedef struct cokolwiek {
     size_t id;
     char nazwa[100];

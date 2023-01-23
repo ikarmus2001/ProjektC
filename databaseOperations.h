@@ -1,6 +1,6 @@
 #ifndef DATABASE_OPERATIONS_H
 #define DATABASE_OPERATIONS_H
 
-int readFromFile();
+unsigned char readDatabase(unsigned char source, GtkWidget* newTreeView);
 
 #endif

@@ -1,6 +1,6 @@
 #include "windowPrepare.h"
 #include <gtk/gtk.h>
-#include "databaseOperations.h"
+#include "ViewController.h"
 
 
 
@@ -25,9 +25,11 @@ static GtkWidget* setupButton(char* label) {
 
 
 static void readFromFile_OnClick(GtkWidget *widget, gpointer data) {
-    printf("readFromFile Clicked\n");
-    if (readFromFile() != 0)
-        printf("Error in readFromFile\n");
+    // printf("readFromFile Clicked\n");
+    
+    if(readDatabase(0, &newTreeView)) {
+        data = 
+    }
 }
 
 static void addItem_OnClick(GtkWidget *widget, gpointer data) {
@@ -48,14 +50,13 @@ static void addEventSubscriptions(
     printf("Connecting button handlers start\n");
 
     g_signal_connect(readFromFile_btn, "clicked", G_CALLBACK(readFromFile_OnClick), NULL);
-    printf("After connecting onclick handler readFromFile\n");
-
+    // printf("After connecting onclick handler readFromFile\n");
 
     g_signal_connect(addItem_btn, "clicked", G_CALLBACK(addItem_OnClick), NULL);
-    printf("After connecting onclick handler addItem_btn\n");
+    // printf("After connecting onclick handler addItem_btn\n");
 
     g_signal_connect(saveToFile_btn, "clicked", G_CALLBACK(saveToFile_OnClick), NULL);
-    printf("After connecting onclick handler saveToFile_btn\n");
+    // printf("After connecting onclick handler saveToFile_btn\n");
 
     printf("Connecting button handlers end\n");
 }

@@ -1,7 +1,8 @@
-#include "fileOperations.h"
-#include "../Structures/structures.h"
-#include <stdio.h>
 #include <gtk/gtk.h>
+#include <stdio.h>
+#include "../FileOperations/fileOperations.h"
+#include "../Structures/structures.h"
+
 
 int countLines(FILE* file) {
     // https://stackoverflow.com/a/70708991/14345698
@@ -37,6 +38,28 @@ int countLines(FILE* file) {
     return counter;
 }
 
+/* Checks data integrity and creates structures,
+returns  zainicjowaną i wypełnioną danymi strukturę, 
+w przypadku błędu zwraca NULL */
+unsigned char checkLine(char* str, JakasStruktura* newStruct) {
+    char* readString;
+    int d1;
+    float f1;
+    sscanf(str, "%100[^;];%d;%f", readString, &d1, &f1);
+    printf("Checking line: Read nazwa: \"%s\", ilosc=%d, wartosc=%f\n", readString, d1, f1);
+    if (readString[0] != '\0') {
+        JakasStruktura* newLine = (JakasStruktura*)malloc(sizeof(JakasStruktura));
+        strcpy(newLine->nazwa, readString);
+        // newLine->nazwa = *readString;
+        newLine->ilosc = d1;
+        newLine->wartosc = f1;
+        printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
+                newLine->nazwa, newLine->ilosc, newLine->wartosc);
+        return newLine;
+    }
+    return NULL;
+}
+
 void saveToFile(char filename[], JakasStruktura struktury[]) {
     signed char toDelete[sizeof(struktury)/sizeof(JakasStruktura)];
     signed char toAlter[sizeof(struktury)/sizeof(JakasStruktura)];
@@ -66,7 +89,7 @@ void saveToFile(char filename[], JakasStruktura struktury[]) {
     }
 }
 
-FILE* selectAndOpenFile() {  //GtkWindow* parentWindow) {
+char* selectFile() {  //GtkWindow* parentWindow) {
     printf("Selecting file started\n");
 
     GtkWidget *dialog;
@@ -74,7 +97,7 @@ FILE* selectAndOpenFile() {  //GtkWindow* parentWindow) {
     gint res;
     FILE* fs = NULL;
 
-    
+    char *filename;
 
     dialog = gtk_file_chooser_dialog_new ("Open File",
         NULL /*parentWindow*/, action, "Cancel", GTK_RESPONSE_CANCEL,
@@ -84,21 +107,17 @@ FILE* selectAndOpenFile() {  //GtkWindow* parentWindow) {
 
     res = gtk_dialog_run (GTK_DIALOG (dialog));
     if (res == GTK_RESPONSE_ACCEPT) {
-        char *filename;
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
         
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);    
         filename = (char*)gtk_file_chooser_get_filename (chooser);
-
         printf("Selecting file: Chosen file: %s\n", filename);
-
-        fs = fopen(filename, "r");
     }
 
     gtk_widget_destroy (dialog);
 
     printf("Selecting file ended, file_chooser destroyed\n");
 
-    return fs;
+    return filename;
 }
 
 
@@ -136,11 +155,14 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, Jakas
 
 
 // Handles loading database from file
-int readFromFile() {
-    FILE* filestream = selectAndOpenFile();
+unsigned char readFromFile(JakasStruktura* structuresArray, size_t* rowsRead) {
+    char* filestream = selectFile();
+
     if (filestream == NULL)
         return -1;
     
+    FILE* filestream = fopen(filename, "r");
+
     int fileLength = countLines(filestream);
 
     if (fileLength <= 0)
