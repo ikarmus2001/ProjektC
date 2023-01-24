@@ -1,6 +1,8 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
+#include <stdio.h>
+
 typedef struct cokolwiek {
     size_t id;
     char nazwa[100];

@@ -3,8 +3,6 @@
 
 #include <gtk/gtk.h>
 
-// todo: zmiana kolejności funkcji będzie całkiem na miejscu
-
 void handleError(GError**);
 void activate(GtkApplication*, gpointer);
 

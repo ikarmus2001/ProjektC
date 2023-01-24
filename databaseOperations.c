@@ -1,17 +1,15 @@
 #include "databaseOperations.h"
 #include "Structures/structures.h"
 #include "FileOperations/fileOperations.h"
-#include <stdio.h>
-#include <gtk/gtk.h>
 
-unsigned char retrieveData(unsigned char source, JakasStruktura* warehouseArray, size_t warehouseLength){
+unsigned char retrieveData(unsigned char source, JakasStruktura* warehouseArray, size_t* warehouseLength){
     unsigned char result;
     switch (source) {
         case 0:
-            result = readFromFile(&warehouseArray, &warehouseLength);
+            result = readFromFile(warehouseArray, warehouseLength);
             break;
         case 1:
-            result = readFromDatabase1(&warehouseArray, &warehouseLength);
+            //result = readFromDatabase1(warehouseArray, warehouseLength);
             break;
     }
     return result;

@@ -1,5 +1,3 @@
-#include <gtk/gtk.h>
-#include <stdio.h>
 #include "../FileOperations/fileOperations.h"
 #include "../Structures/structures.h"
 
@@ -41,7 +39,7 @@ int countLines(FILE* file) {
 /* Checks data integrity and creates structures,
 returns  zainicjowaną i wypełnioną danymi strukturę, 
 w przypadku błędu zwraca NULL */
-unsigned char checkLine(char* str, JakasStruktura* newStruct) {
+unsigned char checkLine(char* str, JakasStruktura** newStruct) {
     char* readString;
     int d1;
     float f1;
@@ -53,11 +51,14 @@ unsigned char checkLine(char* str, JakasStruktura* newStruct) {
         // newLine->nazwa = *readString;
         newLine->ilosc = d1;
         newLine->wartosc = f1;
-        printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
-                newLine->nazwa, newLine->ilosc, newLine->wartosc);
-        return newLine;
+        // printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
+        //         newLine->nazwa, newLine->ilosc, newLine->wartosc);
+
+        *newStruct = newLine;
+
+        return 0;
     }
-    return NULL;
+    return 1;
 }
 
 void saveToFile(char filename[], JakasStruktura struktury[]) {
@@ -68,9 +69,11 @@ void saveToFile(char filename[], JakasStruktura struktury[]) {
 
     if ((fs = fopen(filename, "w")) != NULL) {
 
-    for (int i = 0; i < sizeof(struktury)/sizeof(JakasStruktura); i++) {
-        if ((&struktury[i])->stan != 2)
-            fprintf(fs, "%s;%d;%f\n", (&struktury[i])->nazwa, (&struktury[i])->ilosc, (&struktury[i])->wartosc);
+    // for (int i = 0; i < sizeof(struktury)/sizeof(JakasStruktura); i++) {
+    //     if ((&struktury[i])->stan != 2)
+    //         fprintf(fs, "%s;%d;%f\n", 
+    //         (&struktury[i])->nazwa, (&struktury[i])->ilosc, (&struktury[i])->wartosc);
+        
         // switch ((&struktury[i])->stan) {
         //     case -1:
         //         toDelete[deleteIndex] = (&struktury[i])->id;
@@ -86,7 +89,6 @@ void saveToFile(char filename[], JakasStruktura struktury[]) {
     }
 
     fclose(fs);
-    }
 }
 
 char* selectFile() {  //GtkWindow* parentWindow) {
@@ -121,25 +123,35 @@ char* selectFile() {  //GtkWindow* parentWindow) {
 }
 
 
-JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura js[]) {
+void createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura** js) {
     printf("Create struct from file: start\n");
-    JakasStruktura* currentItem;
+    JakasStruktura* currentItem = malloc(fileLength * sizeof(JakasStruktura));
     size_t failed = 0;
     size_t j = 0;
     unsigned int buffer_size = 500;
     char buffer[buffer_size];
+    
     for (size_t i = 0; i < fileLength; i++) {
         fgets(buffer, buffer_size, filestream);
-        currentItem = (JakasStruktura*)malloc(sizeof(JakasStruktura));
+
         // printf("createStructsFromFile: read line: ");
         //printf("%s \n", buffer);
-        if ((currentItem = checkLine(buffer)) != NULL) {
+
+        if (checkLine(buffer, &currentItem[i]) == 0) {
             printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 
-                    currentItem->nazwa, currentItem->ilosc, currentItem->wartosc);
-            js[j] = *currentItem;
+                    currentItem[i].nazwa, 
+                    currentItem[i].ilosc, 
+                    currentItem[i].wartosc);
+
+            
             printf("createStructsFromFile: Checked, got \"%s\", ilosc=%d, wartosc=%f \n", 
-                    currentItem->nazwa, currentItem->ilosc, currentItem->wartosc);
+                    currentItem[i].nazwa, currentItem[i].ilosc, currentItem[i].wartosc);
+
+            *js[j] = currentItem[i];
             j++;
+
+            *js[j++] = currentItem[i];
+
             printf("%zd", j);
         }
         else
@@ -150,29 +162,24 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, Jakas
         printf("\"%s\", ilosc=%d, wartosc=%f\n", 
             (&js[i])->nazwa, (&js[i])->ilosc, (&js[i])->wartosc);
     }
-    return js;
 }
 
 
 // Handles loading database from file
-unsigned char readFromFile(JakasStruktura* structuresArray, size_t* rowsRead) {
-    char* filestream = selectFile();
-
-    if (filestream == NULL)
+unsigned char retrieveData(JakasStruktura* structuresArray, size_t* rowsRead) {
+    char* filename = selectFile();
+    if (filename == NULL)
         return -1;
-    
+
     FILE* filestream = fopen(filename, "r");
-
     int fileLength = countLines(filestream);
-
     if (fileLength <= 0)
         return -1;
     
-    JakasStruktura js[fileLength]; // = malloc(fileLength * sizeof(JakasStruktura));
+    JakasStruktura* js; // = malloc(fileLength * sizeof(JakasStruktura));
 
-    createStructsFromFile(filestream, fileLength, js);
+    createStructsFromFile(filestream, fileLength, &js);
     fclose(filestream);
-    printf("readFromFile: Escaped, stream closed");
-    GtkWidget* listBox = fillWarehouse(js);
+    // printf("readFromFile: Escaped, stream closed");
     return 0;
 }

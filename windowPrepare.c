@@ -1,7 +1,5 @@
 #include "windowPrepare.h"
-#include <gtk/gtk.h>
 #include "ViewController.h"
-
 
 
 // Tworzy okno i ustawia jego właściwości
@@ -24,16 +22,18 @@ static GtkWidget* setupButton(char* label) {
 }
 
 
-static void readFromFile_OnClick(GtkWidget *widget, gpointer data) {
+static void readFromFile_OnClick(GtkWidget *widget, gpointer mainTreeView) {
     // printf("readFromFile Clicked\n");
     
-    if(readDatabase(0, &newTreeView)) {
-        data = 
+    GtkWidget* newTreeView = malloc(sizeof(GtkWidget));
+
+    if(readDatabase(0, newTreeView)) {
+        mainTreeView = newTreeView;
     }
 }
 
 static void addItem_OnClick(GtkWidget *widget, gpointer data) {
-    
+    CreateNewElement();  // TODO 
 }
 
 static void saveToFile_OnClick(GtkWidget *widget, gpointer data) {
@@ -45,11 +45,11 @@ static void addEventSubscriptions(
         GtkWidget* readFromFile_btn, 
         GtkWidget* addItem_btn, 
         GtkWidget* saveToFile_btn,
-        GtkWidget* window) {
+        GtkWidget* mainTreeView) {
 
     printf("Connecting button handlers start\n");
 
-    g_signal_connect(readFromFile_btn, "clicked", G_CALLBACK(readFromFile_OnClick), NULL);
+    g_signal_connect(readFromFile_btn, "clicked", G_CALLBACK(readFromFile_OnClick), &mainTreeView);
     // printf("After connecting onclick handler readFromFile\n");
 
     g_signal_connect(addItem_btn, "clicked", G_CALLBACK(addItem_OnClick), NULL);
@@ -100,7 +100,7 @@ void activate(GtkApplication *app, gpointer user_data) {
 
     fprintf(stdout, "Po zapakowaniu buttonów\n");
 
-    addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, window);
+    addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, mainTreeView);
     // gtk_container_add(GTK_CONTAINER(window), button);
     gtk_container_add(GTK_CONTAINER(window), menuHorizontalBox);
 
