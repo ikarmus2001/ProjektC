@@ -12,6 +12,8 @@ Creates and populates new GtkTreeView with provided data
 GtkWidget* createNewTreeView(JakasStruktura* js, size_t rowsRead) {
     GtkListStore* store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT);
     GtkWidget* newTreeView = gtk_tree_view_new();
+
+    printf("Element 0: %s", js[0].nazwa);
     
     GtkTreeIter iter;
     for (int i = 0; i < rowsRead; i++) {
