@@ -3,8 +3,9 @@
 
 #include <gtk/gtk.h>
 #include "Structures/structures.h"
-#include "FileOperations/fileOperations.h"
+#include "databaseOperations.h"
 
-unsigned char readDatabase(unsigned char source, GtkWidget* newTreeView);
+unsigned char getNewData(unsigned char, GtkWidget**);
+// unsigned char getNewData(unsigned char source, GtkWidget** newTreeView);
 
 #endif //VIEW_CONTROLLER_H

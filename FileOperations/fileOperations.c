@@ -1,12 +1,12 @@
 #include "../FileOperations/fileOperations.h"
 #include "../Structures/structures.h"
 
-
+/*
+Counts how many struct rows might be possibly created by
+counting amount of lines in file
+*/
 int countLines(FILE* file) {
     // https://stackoverflow.com/a/70708991/14345698
-
-    // TODO check file length before reading
-    // #include <sys/stat.h> https://stackoverflow.com/a/238609
 
     char buf[65536];
     int counter = 0;
@@ -36,9 +36,36 @@ int countLines(FILE* file) {
     return counter;
 }
 
-/* Checks data integrity and creates structures,
-returns  zainicjowaną i wypełnioną danymi strukturę, 
-w przypadku błędu zwraca NULL */
+/*
+Opens file selection dialog and on success returns abs path to file
+*/
+char* selectFile() {
+    GtkWidget* dialog;
+    char *filename = NULL;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+
+    dialog = gtk_file_chooser_dialog_new ("Open File",
+        NULL /*parentWindow*/, action, "Cancel", GTK_RESPONSE_CANCEL,
+        "Open", GTK_RESPONSE_ACCEPT, NULL);
+
+    printf("Selecting file: Setup file chooser\n");
+
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);    
+        filename = (char*)gtk_file_chooser_get_filename(chooser);
+        printf("Selecting file: Chosen file: %s\n", filename);
+    }
+
+    gtk_widget_destroy (dialog);
+    printf("Selecting file ended, file_chooser destroyed\n");
+    return filename;
+}
+
+/* 
+Checks data integrity and creates structures,
+provides initiated and data-filled struct,
+Returns 0, on error 1
+*/
 unsigned char checkLine(char* str, JakasStruktura** newStruct) {
     char* readString;
     int d1;
@@ -48,82 +75,22 @@ unsigned char checkLine(char* str, JakasStruktura** newStruct) {
     if (readString[0] != '\0') {
         JakasStruktura* newLine = (JakasStruktura*)malloc(sizeof(JakasStruktura));
         strcpy(newLine->nazwa, readString);
-        // newLine->nazwa = *readString;
         newLine->ilosc = d1;
         newLine->wartosc = f1;
         // printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
         //         newLine->nazwa, newLine->ilosc, newLine->wartosc);
 
         *newStruct = newLine;
-
         return 0;
     }
     return 1;
 }
 
-void saveToFile(char filename[], JakasStruktura struktury[]) {
-    signed char toDelete[sizeof(struktury)/sizeof(JakasStruktura)];
-    signed char toAlter[sizeof(struktury)/sizeof(JakasStruktura)];
-    signed char alterIndex = 0, deleteIndex = 0;
-    FILE* fs;
-
-    if ((fs = fopen(filename, "w")) != NULL) {
-
-    // for (int i = 0; i < sizeof(struktury)/sizeof(JakasStruktura); i++) {
-    //     if ((&struktury[i])->stan != 2)
-    //         fprintf(fs, "%s;%d;%f\n", 
-    //         (&struktury[i])->nazwa, (&struktury[i])->ilosc, (&struktury[i])->wartosc);
-        
-        // switch ((&struktury[i])->stan) {
-        //     case -1:
-        //         toDelete[deleteIndex] = (&struktury[i])->id;
-        //         deleteIndex++;
-        //         continue;
-        //     case 1:
-        //         toAlter[alterIndex] = (&struktury[i])->id;
-        //         alterIndex++;
-        //         break;
-        //     default:
-        //         fprintf(fs, "%s;%d;%f\n", (&struktury[i])->nazwa, (&struktury[i])->ilosc, (&struktury[i])->wartosc);
-        // }
-    }
-
-    fclose(fs);
-}
-
-char* selectFile() {  //GtkWindow* parentWindow) {
-    printf("Selecting file started\n");
-
-    GtkWidget *dialog;
-    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-    gint res;
-    FILE* fs = NULL;
-
-    char *filename;
-
-    dialog = gtk_file_chooser_dialog_new ("Open File",
-        NULL /*parentWindow*/, action, "Cancel", GTK_RESPONSE_CANCEL,
-        "Open", GTK_RESPONSE_ACCEPT, NULL);
-
-    printf("Selecting file: Setup file chooser\n");
-
-    res = gtk_dialog_run (GTK_DIALOG (dialog));
-    if (res == GTK_RESPONSE_ACCEPT) {
-        
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);    
-        filename = (char*)gtk_file_chooser_get_filename (chooser);
-        printf("Selecting file: Chosen file: %s\n", filename);
-    }
-
-    gtk_widget_destroy (dialog);
-
-    printf("Selecting file ended, file_chooser destroyed\n");
-
-    return filename;
-}
-
-
-void createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura** js) {
+/*
+Reads `fileLength` of lines from filestream and saves them to preallocated `js`
+Returns amount of invalid lines
+*/
+size_t createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura** js) {
     printf("Create struct from file: start\n");
     JakasStruktura* currentItem = malloc(fileLength * sizeof(JakasStruktura));
     size_t failed = 0;
@@ -133,40 +100,31 @@ void createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura**
     
     for (size_t i = 0; i < fileLength; i++) {
         fgets(buffer, buffer_size, filestream);
-
-        // printf("createStructsFromFile: read line: ");
-        //printf("%s \n", buffer);
-
         if (checkLine(buffer, &currentItem[i]) == 0) {
-            printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 
-                    currentItem[i].nazwa, 
-                    currentItem[i].ilosc, 
-                    currentItem[i].wartosc);
-
-            
-            printf("createStructsFromFile: Checked, got \"%s\", ilosc=%d, wartosc=%f \n", 
-                    currentItem[i].nazwa, currentItem[i].ilosc, currentItem[i].wartosc);
+            // printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 
+            //         currentItem[i].nazwa, 
+            //         currentItem[i].ilosc, 
+            //         currentItem[i].wartosc);
+            currentItem[i].id = j;
+            currentItem[i].stan = 0;
 
             *js[j] = currentItem[i];
             j++;
 
-            *js[j++] = currentItem[i];
-
-            printf("%zd", j);
+            // printf("createStructsFromFile: inserted %zdth struct", j);
         }
         else
-            failed++;  // todo obsługa?
+            failed++;
     }
-    printf("Create struct from file: Finished creating, encountered %zd / %zd errors\n", failed, fileLength);
-    for (size_t i = 0; i < fileLength; i++) {
-        printf("\"%s\", ilosc=%d, wartosc=%f\n", 
-            (&js[i])->nazwa, (&js[i])->ilosc, (&js[i])->wartosc);
-    }
+    // printf("Create struct from file: Finished creating, read %zd / %zd lines\n", failed, fileLength);
+    free(currentItem);
+    return failed;
 }
 
-
-// Handles loading database from file
-unsigned char retrieveData(JakasStruktura* structuresArray, size_t* rowsRead) {
+/*
+Handles loading database from file
+*/
+unsigned char getDataFromFile(JakasStruktura** structuresArray, size_t* rowsRead) {
     char* filename = selectFile();
     if (filename == NULL)
         return -1;
@@ -176,10 +134,34 @@ unsigned char retrieveData(JakasStruktura* structuresArray, size_t* rowsRead) {
     if (fileLength <= 0)
         return -1;
     
-    JakasStruktura* js; // = malloc(fileLength * sizeof(JakasStruktura));
+    // JakasStruktura* js = malloc(fileLength * sizeof(JakasStruktura));
 
-    createStructsFromFile(filestream, fileLength, &js);
+    createStructsFromFile(filestream, fileLength, &structuresArray);
     fclose(filestream);
     // printf("readFromFile: Escaped, stream closed");
+    return 0;
+}
+
+/*
+Opens file stream and saves provided structs
+Returns -1 on file opening error
+*/
+char saveToFile(char* path, JakasStruktura* structsArray, size_t arrayLength) {
+    FILE* fs;
+
+    if ((fs = fopen(path, "w")) == NULL) {
+        fclose(fs);
+        return -1;
+    }
+
+    for (int i = 0; i < arrayLength; i++) {
+        if (structsArray->stan != 2) {
+            fprintf(fs, "%s;%d;%f\n", 
+            structsArray->nazwa, structsArray->ilosc, structsArray->wartosc);
+
+            structsArray = structsArray + sizeof(JakasStruktura);
+        }
+    }
+    fclose(fs);
     return 0;
 }

@@ -15,32 +15,27 @@ static GtkWidget* setupWindow(GtkApplication *app, gpointer user_data) {
     return window;
 }
 
-// Tworzy obiekt przycisku i nadaje mu zadane właściwości
-static GtkWidget* setupButton(char* label) {
-    GtkWidget *btn = gtk_button_new_with_label(label);
-    return btn;
-}
-
-
 static void readFromFile_OnClick(GtkWidget *widget, gpointer mainTreeView) {
     // printf("readFromFile Clicked\n");
     
     GtkWidget* newTreeView = malloc(sizeof(GtkWidget));
 
-    if(readDatabase(0, newTreeView)) {
+    if(getNewData(0, &newTreeView)) {
         mainTreeView = newTreeView;
     }
 }
 
 static void addItem_OnClick(GtkWidget *widget, gpointer data) {
-    CreateNewElement();  // TODO 
+    // CreateNewElement();  // TODO 
 }
 
 static void saveToFile_OnClick(GtkWidget *widget, gpointer data) {
     
 }
 
-// Dodaje funkcje do zdarzeń
+/*
+Connects functions to event handlers
+*/
 static void addEventSubscriptions(
         GtkWidget* readFromFile_btn, 
         GtkWidget* addItem_btn, 
@@ -61,12 +56,17 @@ static void addEventSubscriptions(
     printf("Connecting button handlers end\n");
 }
 
+/*
+Basic error print and ignore mechanism
+*/
 void handleError(GError **err) {
     printf("%d: %s, code: %d", (*err)->domain, (*err)->message, (*err)->code);
     g_error_free(*err);
-    // todo jakaś obsługa by się przydała
 }
 
+/*
+Creates initial empty TreeView widget
+*/
 static GtkWidget* createMainTreeView() {
     GtkTreeModel* store = GTK_TREE_MODEL(gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT));
     GtkWidget* result = gtk_tree_view_new();
@@ -75,7 +75,9 @@ static GtkWidget* createMainTreeView() {
     return result;
 }
 
-// Ustawia elementy UI
+/*
+Creates UI and connects event handlers
+*/
 void activate(GtkApplication *app, gpointer user_data) {
 
     GtkWidget *window = setupWindow(app, &user_data);
@@ -85,11 +87,11 @@ void activate(GtkApplication *app, gpointer user_data) {
 
     GtkWidget* mainTreeView = createMainTreeView();
 
-    GtkWidget *readFromFile_btn = setupButton("Wczytaj dane");
-    GtkWidget *addItem_btn = setupButton("Dodaj <coś>");
-    GtkWidget *saveToFile_btn = setupButton("Zapisz");
+    GtkWidget *readFromFile_btn = gtk_button_new_with_label("Wczytaj dane");
+    GtkWidget *addItem_btn = gtk_button_new_with_label("Dodaj <coś>");
+    GtkWidget *saveToFile_btn = gtk_button_new_with_label("Zapisz");
 
-    fprintf(stdout, "Po utworzeniu przycisków\n");
+    // printf("Po utworzeniu przycisków\n");
 
     //setupContainers();
     gtk_box_pack_start(GTK_BOX(menuHorizontalBox), mainTreeView, 0, 0, 0);
@@ -98,17 +100,18 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), addItem_btn, 0, 0, 0);
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), saveToFile_btn, 0, 0, 0);
 
-    fprintf(stdout, "Po zapakowaniu buttonów\n");
+    // printf("Po zapakowaniu buttonów\n");
 
     addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, mainTreeView);
     // gtk_container_add(GTK_CONTAINER(window), button);
+
     gtk_container_add(GTK_CONTAINER(window), menuHorizontalBox);
 
-    fprintf(stdout, "po dodaniu containera");
+    // printf("po dodaniu containera");
 
     gtk_widget_show_all(window);
 
-    fprintf(stdout, "po pokazaniu widgetów");
+    // printf("po pokazaniu widgetów");
 
     
 }
