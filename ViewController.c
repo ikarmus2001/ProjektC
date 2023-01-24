@@ -10,7 +10,7 @@ enum colNames {
 Creates and populates new GtkTreeView with provided data
 */
 GtkWidget* createNewTreeView(JakasStruktura* js, size_t rowsRead) {
-    GtkWidget* store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT);
+    GtkListStore* store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT);
     GtkWidget* newTreeView = gtk_tree_view_new();
     
     GtkTreeIter iter;
@@ -22,9 +22,7 @@ GtkWidget* createNewTreeView(JakasStruktura* js, size_t rowsRead) {
             COL_WARTOSC, js[i].wartosc);
     }
 
-    store = GTK_TREE_MODEL(store);
-
-    gtk_tree_view_set_model(GTK_TREE_VIEW(newTreeView), store);
+    gtk_tree_view_set_model(GTK_TREE_VIEW(newTreeView), GTK_TREE_MODEL(store));
     return newTreeView;
 }
 
@@ -33,12 +31,12 @@ Retrieves data and creates new TreeView widget
 */
 unsigned char getNewData(unsigned char source, GtkWidget** newTreeView) {
     JakasStruktura* js;
-    size_t* rowsRead;
+    size_t rowsRead;
     unsigned char result;
-    if ((result = readDatabase(&js, &rowsRead)) != 0)
+    if ((result = readDatabase(source, &js, &rowsRead)) != 0)
         return result;
     
-    newTreeView = createNewTreeView(js, rowsRead);
+    *newTreeView = createNewTreeView(js, rowsRead);
 
     return 0;
 }

@@ -1,8 +1,9 @@
 #include "windowPrepare.h"
 #include "ViewController.h"
 
-
-// Tworzy okno i ustawia jego właściwości
+/*
+Setups basic window properties
+*/
 static GtkWidget* setupWindow(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Current stash");
@@ -11,10 +12,12 @@ static GtkWidget* setupWindow(GtkApplication *app, gpointer user_data) {
     if(gtk_window_set_icon_from_file(GTK_WINDOW(window), "./jupijej.gif", &err) != TRUE) {
         handleError(&err);
     }
-
     return window;
 }
 
+/*
+On button click orders read from file and creation of new TreeView
+*/
 static void readFromFile_OnClick(GtkWidget *widget, gpointer mainTreeView) {
     // printf("readFromFile Clicked\n");
     
@@ -30,7 +33,7 @@ static void addItem_OnClick(GtkWidget *widget, gpointer data) {
 }
 
 static void saveToFile_OnClick(GtkWidget *widget, gpointer data) {
-    
+    // TODO
 }
 
 /*
@@ -91,8 +94,6 @@ void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *addItem_btn = gtk_button_new_with_label("Dodaj <coś>");
     GtkWidget *saveToFile_btn = gtk_button_new_with_label("Zapisz");
 
-    // printf("Po utworzeniu przycisków\n");
-
     //setupContainers();
     gtk_box_pack_start(GTK_BOX(menuHorizontalBox), mainTreeView, 0, 0, 0);
     gtk_box_pack_end(GTK_BOX(menuHorizontalBox), menuVerticalBox, 0, 0, 0);
@@ -100,18 +101,10 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), addItem_btn, 0, 0, 0);
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), saveToFile_btn, 0, 0, 0);
 
-    // printf("Po zapakowaniu buttonów\n");
-
     addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, mainTreeView);
     // gtk_container_add(GTK_CONTAINER(window), button);
 
     gtk_container_add(GTK_CONTAINER(window), menuHorizontalBox);
 
-    // printf("po dodaniu containera");
-
     gtk_widget_show_all(window);
-
-    // printf("po pokazaniu widgetów");
-
-    
 }

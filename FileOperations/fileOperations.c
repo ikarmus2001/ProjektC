@@ -66,12 +66,13 @@ Checks data integrity and creates structures,
 provides initiated and data-filled struct,
 Returns 0, on error 1
 */
-unsigned char checkLine(char* str, JakasStruktura** newStruct) {
+JakasStruktura* checkLine(char* str) {
     char* readString;
     int d1;
     float f1;
+    
     sscanf(str, "%100[^;];%d;%f", readString, &d1, &f1);
-    printf("Checking line: Read nazwa: \"%s\", ilosc=%d, wartosc=%f\n", readString, d1, f1);
+    // printf("Checking line: Read nazwa: \"%s\", ilosc=%d, wartosc=%f\n", readString, d1, f1);
     if (readString[0] != '\0') {
         JakasStruktura* newLine = (JakasStruktura*)malloc(sizeof(JakasStruktura));
         strcpy(newLine->nazwa, readString);
@@ -79,11 +80,9 @@ unsigned char checkLine(char* str, JakasStruktura** newStruct) {
         newLine->wartosc = f1;
         // printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
         //         newLine->nazwa, newLine->ilosc, newLine->wartosc);
-
-        *newStruct = newLine;
-        return 0;
+        return newLine;
     }
-    return 1;
+    return NULL;
 }
 
 /*
@@ -92,7 +91,7 @@ Returns amount of invalid lines
 */
 size_t createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura** js) {
     printf("Create struct from file: start\n");
-    JakasStruktura* currentItem = malloc(fileLength * sizeof(JakasStruktura));
+    JakasStruktura** currentItem = malloc(fileLength * sizeof(JakasStruktura));
     size_t failed = 0;
     size_t j = 0;
     unsigned int buffer_size = 500;
@@ -100,15 +99,15 @@ size_t createStructsFromFile(FILE* filestream, size_t fileLength, JakasStruktura
     
     for (size_t i = 0; i < fileLength; i++) {
         fgets(buffer, buffer_size, filestream);
-        if (checkLine(buffer, &currentItem[i]) == 0) {
+        if ((currentItem[i] = checkLine(buffer)) != NULL) {
             // printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 
             //         currentItem[i].nazwa, 
             //         currentItem[i].ilosc, 
             //         currentItem[i].wartosc);
-            currentItem[i].id = j;
-            currentItem[i].stan = 0;
+            currentItem[i]->id = j;
+            currentItem[i]->stan = 0;
 
-            *js[j] = currentItem[i];
+            js[j] = currentItem[i];
             j++;
 
             // printf("createStructsFromFile: inserted %zdth struct", j);
@@ -136,7 +135,7 @@ unsigned char getDataFromFile(JakasStruktura** structuresArray, size_t* rowsRead
     
     // JakasStruktura* js = malloc(fileLength * sizeof(JakasStruktura));
 
-    createStructsFromFile(filestream, fileLength, &structuresArray);
+    createStructsFromFile(filestream, fileLength, structuresArray);
     fclose(filestream);
     // printf("readFromFile: Escaped, stream closed");
     return 0;

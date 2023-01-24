@@ -9,7 +9,7 @@ unsigned char readDatabase(unsigned char source, JakasStruktura** warehouseArray
     unsigned char result;
     switch (source) {
         case 0:
-            result = getDataFromFile(&warehouseArray, &warehouseLength);
+            result = getDataFromFile(warehouseArray, warehouseLength);
             break;
         case 1:
             //result = readFromDatabase1(warehouseArray, warehouseLength);
