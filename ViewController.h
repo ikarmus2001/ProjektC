@@ -5,7 +5,7 @@
 #include "Structures/structures.h"
 #include "databaseOperations.h"
 
-unsigned char getNewData(unsigned char, GtkWidget**);
+GtkWidget* getNewData(unsigned char);
 // unsigned char getNewData(unsigned char source, GtkWidget** newTreeView);
 
 #endif //VIEW_CONTROLLER_H

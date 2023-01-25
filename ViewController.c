@@ -31,14 +31,16 @@ GtkWidget* createNewTreeView(JakasStruktura* js, size_t rowsRead) {
 /*
 Retrieves data and creates new TreeView widget
 */
-unsigned char getNewData(unsigned char source, GtkWidget** newTreeView) {
+GtkWidget* getNewData(unsigned char source) {
     JakasStruktura* js;
     size_t rowsRead;
     unsigned char result;
-    if ((result = readDatabase(source, &js, &rowsRead)) != 0)
-        return result;
+    js = readDatabase(source, &rowsRead);
     
-    *newTreeView = createNewTreeView(js, rowsRead);
+    GtkWidget* newTreeView = createNewTreeView(js, rowsRead);
+    return newTreeView;
+}
 
-    return 0;
+unsigned char saveData(unsigned char destination, GtkWidget* existingTreeView) {
+    
 }

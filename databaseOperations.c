@@ -5,17 +5,16 @@
 Reads data from chosen source, populates warehouse
 Returns result of data retrievement
 */
-unsigned char readDatabase(unsigned char source, JakasStruktura** warehouseArray, size_t* warehouseLength) {
-    unsigned char result;
+JakasStruktura* readDatabase(unsigned char source, size_t* warehouseLength) {
+    // unsigned char result;  // TODO
+    JakasStruktura* warehouseArray;
     switch (source) {
         case 0:
-            result = getDataFromFile(warehouseArray, warehouseLength);
+            warehouseArray = getDataFromFile(warehouseLength);
             break;
         case 1:
             //result = readFromDatabase1(warehouseArray, warehouseLength);
             break;
     }
-    return result;
+    return warehouseArray;
 }
-
-

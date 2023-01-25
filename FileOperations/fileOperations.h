@@ -6,9 +6,8 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 
-unsigned char getDataFromFile(JakasStruktura**, size_t*);
-// unsigned char getDataFromFile(JakasStruktura* structuresArray, size_t* rowsRead);
+JakasStruktura* getDataFromFile(size_t*);
+
 char saveToFile(char*, JakasStruktura*, size_t);
-// char saveToFile(char* path, JakasStruktura* structsArray, size_t arrayLength);
 
 #endif //FILE_OPERATIONS_H

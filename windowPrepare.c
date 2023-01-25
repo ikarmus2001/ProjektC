@@ -21,11 +21,8 @@ On button click orders read from file and creation of new TreeView
 static void readFromFile_OnClick(GtkWidget *widget, gpointer mainTreeView) {
     // printf("readFromFile Clicked\n");
     
-    GtkWidget* newTreeView = malloc(sizeof(GtkWidget));
-
-    if(getNewData(0, &newTreeView)) {
-        mainTreeView = newTreeView;
-    }
+    GtkWidget* newTreeView = getNewData(0);
+    mainTreeView = newTreeView;
 }
 
 static void addItem_OnClick(GtkWidget *widget, gpointer data) {

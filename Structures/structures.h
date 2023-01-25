@@ -5,7 +5,7 @@
 
 typedef struct cokolwiek {
     size_t id;
-    char nazwa[100];
+    char* nazwa;
     int ilosc;
     float wartosc;
     signed char stan;
