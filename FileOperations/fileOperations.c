@@ -177,12 +177,12 @@ Returns -1 on file opening error
 char saveToFile(JakasStruktura* structsArray, size_t arrayLength) {
     char* filename = selectFile(GTK_FILE_CHOOSER_ACTION_SAVE);
     if (filename == NULL)
-        return NULL;
+        return -1;
 
     FILE* filestream = fopen(filename, "r");
     int fileLength = countLines(filestream);
     if (fileLength <= 0)
-        return NULL;
+        return -1;
 
     for (int i = 0; i < arrayLength; i++) {
         if (structsArray->stan != 2) {

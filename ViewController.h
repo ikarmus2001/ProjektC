@@ -7,5 +7,7 @@
 
 GtkWidget* getNewData(unsigned char);
 GtkWidget* createNewTreeView(JakasStruktura*, size_t);
+void addRow(GtkWidget*);
+unsigned char saveData(unsigned char, GtkWidget*);
 
 #endif //VIEW_CONTROLLER_H

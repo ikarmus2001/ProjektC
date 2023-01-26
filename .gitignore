@@ -1,10 +1,10 @@
 a.out
+main
 example.c
 example
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/tasks.json
-main
 .vs/ProjektC/FileContentIndex/read.lock
 .vs/ProjektC/v17/.suo
 .vs/ProjektC/FileContentIndex/cd32955b-2b58-45ca-97a9-f703303dbac2.vsidx
@@ -13,3 +13,4 @@ main
 .vs/VSWorkspaceState.json
 .vscode/settings.json
 .vs/ProjectSettings.json
+.vs

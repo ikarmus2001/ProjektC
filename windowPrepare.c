@@ -17,11 +17,14 @@ static GtkWidget* setupWindow(GtkApplication *app, gpointer user_data) {
 
 GtkWidget* find_child(GtkWidget *parent, const gchar *name) {
     // https://stackoverflow.com/a/23497087/14345698
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if (g_strcasecmp(gtk_widget_get_name((GtkWidget *)parent), name) == 0) {
         return parent;
     }
+    #pragma GCC diagnostic pop
     GList *children = gtk_container_get_children(GTK_CONTAINER(parent));
-    printf("Child name: %s", children->data);
+
     do {
         GtkWidget *widget = find_child(children->data, name);
         if (widget != NULL)
@@ -32,7 +35,7 @@ GtkWidget* find_child(GtkWidget *parent, const gchar *name) {
 }
 
 /*
-On button click orders read from file and creation of new TreeView
+Reads data from file and swaps TreeView with new one
 */
 static void readFromFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
     // printf("readFromFile Clicked\n");
@@ -45,12 +48,18 @@ static void readFromFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) 
     // gtk_widget_show(mainTreeView);
 }
 
-static void addItem_OnClick(GtkWidget *widget, gpointer data) {
-    // CreateNewElement();  // TODO 
+static void addItem_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
+
+    GtkWidget* mainTreeView = find_child(menuHorizontalBox, "mainTreeView");
+    addRow(mainTreeView);
 }
 
-static void saveToFile_OnClick(GtkWidget *widget, gpointer data) {
-    
+/*
+Gets data from TreeView and saves it to file
+*/
+static void saveToFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
+    GtkWidget* mainTreeView = find_child(menuHorizontalBox, "mainTreeView");
+    saveData(0, mainTreeView);
 }
 
 /*
@@ -67,10 +76,10 @@ static void addEventSubscriptions(
     g_signal_connect(readFromFile_btn, "clicked", G_CALLBACK(readFromFile_OnClick), &menuHorizontalBox);
     // printf("After connecting onclick handler readFromFile\n");
 
-    g_signal_connect(addItem_btn, "clicked", G_CALLBACK(addItem_OnClick), NULL);
+    g_signal_connect(addItem_btn, "clicked", G_CALLBACK(addItem_OnClick), menuHorizontalBox);
     // printf("After connecting onclick handler addItem_btn\n");
 
-    g_signal_connect(saveToFile_btn, "clicked", G_CALLBACK(saveToFile_OnClick), NULL);
+    g_signal_connect(saveToFile_btn, "clicked", G_CALLBACK(saveToFile_OnClick), &menuHorizontalBox);
     // printf("After connecting onclick handler saveToFile_btn\n");
 
     printf("Connecting button handlers end\n");

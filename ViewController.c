@@ -7,6 +7,8 @@ enum colNames {
   COL_COUNT
 };
 
+GtkWidget *nameEntry, *amountEntry, *valueEntry;
+
 /*
 Populates model with read data
 */
@@ -15,10 +17,8 @@ static GtkTreeModel* fill_model(JakasStruktura* js, size_t rowsRead) {
         COL_COUNT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT);
     
     GtkTreeIter iter;
-    printf("js = %p\n", js);
     if (js == NULL) {
-        printf("js IS NULL!\n");
-        gtk_list_store_append(store, &iter);
+        // gtk_list_store_append(store, &iter);
     }
     else {
         for (int i = 0; i < rowsRead; i++) {
@@ -85,7 +85,7 @@ gboolean dataFromModel(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter
                       COL_NAZWA, &nazwa,
                       COL_ILOSC, &ilosc,
                       COL_WARTOSC, &wartosc,
-                      -1);    
+                      -1);
 
     saveToFileManuallyLink(nazwa, ilosc, wartosc);
 
@@ -108,4 +108,57 @@ unsigned char saveData(unsigned char destination, GtkWidget* existingTreeView) {
     getDataFromTreeView(existingTreeView, rowsRead);
     // return saveDatabase(destination, dataToSave, rowsRead);
     return 0;
+}
+
+static void addRowToTreeView(GtkWidget* widget, gpointer mainTreeView) {
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(mainTreeView));
+    GtkTreeIter iter;
+    gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+        COL_NAZWA, gtk_entry_get_text(GTK_ENTRY(nameEntry)), 
+        COL_ILOSC, atoi(gtk_entry_get_text(GTK_ENTRY(amountEntry))), 
+        COL_WARTOSC, atof(gtk_entry_get_text(GTK_ENTRY(valueEntry))), 
+        -1);
+}
+
+/*
+Recursively destroys all children of entryWindow
+*/
+static void addingAborted(GtkWidget* widget, gpointer entryWindow) {
+    gtk_widget_destroy(entryWindow);
+}
+
+void addRow(GtkWidget* mainTreeView) {
+    
+    GtkWidget* inputWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+    nameEntry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(nameEntry), "Nazwa");
+    
+    amountEntry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(amountEntry), "Ilość");
+
+    valueEntry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(valueEntry), "Wartość");
+
+    GtkWidget* addButton = gtk_button_new_with_label("Dodaj");
+    GtkWidget* abortButton = gtk_button_new_with_label("Anuluj");
+
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 50);
+    gtk_box_pack_start(GTK_BOX(box), nameEntry, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), amountEntry, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), valueEntry, FALSE, FALSE, 0);
+
+    g_signal_connect(addButton, "clicked", G_CALLBACK(addRowToTreeView), mainTreeView);
+    g_signal_connect(abortButton, "clicked", G_CALLBACK(addingAborted), inputWindow);
+
+
+    GtkWidget* bottomBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
+    gtk_box_pack_end(GTK_BOX(bottomBox), abortButton, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(bottomBox), addButton, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(box), bottomBox, FALSE, FALSE, 0);
+
+    gtk_container_add(GTK_CONTAINER(inputWindow), box);
+
+    gtk_widget_show_all(inputWindow);
 }

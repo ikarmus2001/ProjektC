@@ -7,6 +7,6 @@
 
 JakasStruktura* readDatabase(unsigned char, size_t*);
 unsigned char saveDatabase(unsigned char, JakasStruktura*, size_t);
-void saveToFileManuallyLink(nazwa, ilosc, wartosc);
+void saveToFileManuallyLink(char*, int*, float*);
 
 #endif

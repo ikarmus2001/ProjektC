@@ -40,7 +40,6 @@ void saveToFileManuallyLink(char* nazwa, int* ilosc, float* wartosc) {
         return;
 
     FILE* filestream = fopen(filename, "a");
-    int fileLength = countLines(filestream);
 
     saveToFileManually(nazwa, ilosc, wartosc, filestream);
 }

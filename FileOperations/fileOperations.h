@@ -10,4 +10,6 @@ JakasStruktura* getDataFromFile(size_t*);
 char saveToFile(JakasStruktura*, size_t);
 void saveToFileManually(char*, int*, float*, FILE*);
 
+char* selectFile(GtkFileChooserAction);
+
 #endif //FILE_OPERATIONS_H
