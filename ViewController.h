@@ -6,6 +6,6 @@
 #include "databaseOperations.h"
 
 GtkWidget* getNewData(unsigned char);
-// unsigned char getNewData(unsigned char source, GtkWidget** newTreeView);
+GtkWidget* createNewTreeView(JakasStruktura*, size_t);
 
 #endif //VIEW_CONTROLLER_H

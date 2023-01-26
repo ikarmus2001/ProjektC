@@ -7,7 +7,7 @@
 #include <gtk/gtk.h>
 
 JakasStruktura* getDataFromFile(size_t*);
-
-char saveToFile(char*, JakasStruktura*, size_t);
+char saveToFile(JakasStruktura*, size_t);
+void saveToFileManually(char*, int*, float*, FILE*);
 
 #endif //FILE_OPERATIONS_H

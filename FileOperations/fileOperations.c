@@ -45,10 +45,9 @@ int countLines(FILE* file) {
 /*
 Opens file selection dialog and on success returns abs path to file
 */
-char* selectFile() {
+char* selectFile(GtkFileChooserAction action) {
     GtkWidget* dialog;
     char *filename = NULL;
-    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
     dialog = gtk_file_chooser_dialog_new ("Open File",
         NULL /*parentWindow*/, action, "Cancel", GTK_RESPONSE_CANCEL,
@@ -73,16 +72,23 @@ provides initiated and data-filled struct,
 Returns 0, on error 1
 */
 JakasStruktura* checkLine(char* str) {
-    char* readString;
+    char readString[100+1];
     int d1;
     float f1;
     
-    sscanf(str, "%100[^;];%d;%f", readString, &d1, &f1);
+    if (sscanf(str, "%100[^;];%d;%f", readString, &d1, &f1) != 3) {
+        printf("sscanf reading failed\n\n");
+        return NULL;
+    }
     // printf("Checking line: Read nazwa: \"%s\", ilosc=%d, wartosc=%f\n", readString, d1, f1);
     if (readString[0] != '\0') {
         JakasStruktura* newLine = malloc(sizeof(JakasStruktura));
-        // strcpy(newLine->nazwa, readString);
-        newLine->nazwa = readString;
+        newLine->nazwa = malloc(strlen(readString) + 1);
+        if (newLine->nazwa == NULL) {
+            printf("Mallocking failed\n\n");
+            return NULL;
+        }
+        strcpy(newLine->nazwa, readString);
         newLine->ilosc = d1;
         newLine->wartosc = f1;
         // printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
@@ -96,10 +102,10 @@ JakasStruktura* checkLine(char* str) {
 Reads `fileLength` of lines from filestream and saves them to preallocated `js`
 Returns amount of invalid lines
 */
-JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength) {
+JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, size_t* rowsRead) {
     printf("Create struct from file: start\n");
-    JakasStruktura* js = malloc(fileLength * sizeof(js));
-    JakasStruktura* currentItem = malloc(sizeof(js));
+    JakasStruktura* js = malloc(fileLength * sizeof(JakasStruktura));
+    JakasStruktura* currentItem = malloc(sizeof(JakasStruktura));
     size_t failed = 0;
     size_t j = 0;
     unsigned int buffer_size = 500;
@@ -124,18 +130,14 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength) {
             js[j] = *currentItem;
             
             printf("createStructsFromFile: inserted %zdth struct\n\n", j);
-            currentItem = (JakasStruktura*)malloc(sizeof(js));
+            currentItem = (JakasStruktura*)malloc(sizeof(JakasStruktura));
             j++;
         }
         else
             failed++;  // TODO
     }
+    *rowsRead = fileLength - failed;
     printf("Create struct from file: Finished creating, failed reading %zd / %zd lines\n", failed, fileLength);
-
-    // printf("createStructsFromFile: Last in memory %s, %d, %f<\n", 
-    //                 currentItem[19]->nazwa, 
-    //                 currentItem[19]->ilosc, 
-    //                 currentItem[19]->wartosc);
     return js;
 }
 
@@ -143,7 +145,7 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength) {
 Handles loading database from file
 */
 JakasStruktura* getDataFromFile(size_t* rowsRead) {
-    char* filename = selectFile();
+    char* filename = selectFile(GTK_FILE_CHOOSER_ACTION_OPEN);
     if (filename == NULL)
         return NULL;
 
@@ -156,11 +158,11 @@ JakasStruktura* getDataFromFile(size_t* rowsRead) {
     
     // JakasStruktura* js = malloc(fileLength * sizeof(JakasStruktura));
 
-    structuresArray = createStructsFromFile(filestream, fileLength);
+    structuresArray = createStructsFromFile(filestream, fileLength, rowsRead);
     printf("created structures:");
-    // printf("[0] %s, [19] %s\n", 
-    //         structuresArray[0]->nazwa, 
-    //         structuresArray[19]->nazwa);
+    printf("[0] %s, [14] %s\n", 
+            structuresArray[0].nazwa, 
+            structuresArray[14].nazwa);
 
     fclose(filestream);
 
@@ -172,22 +174,28 @@ JakasStruktura* getDataFromFile(size_t* rowsRead) {
 Opens file stream and saves provided structs
 Returns -1 on file opening error
 */
-char saveToFile(char* path, JakasStruktura* structsArray, size_t arrayLength) {
-    FILE* fs;
+char saveToFile(JakasStruktura* structsArray, size_t arrayLength) {
+    char* filename = selectFile(GTK_FILE_CHOOSER_ACTION_SAVE);
+    if (filename == NULL)
+        return NULL;
 
-    if ((fs = fopen(path, "w")) == NULL) {
-        fclose(fs);
-        return -1;
-    }
+    FILE* filestream = fopen(filename, "r");
+    int fileLength = countLines(filestream);
+    if (fileLength <= 0)
+        return NULL;
 
     for (int i = 0; i < arrayLength; i++) {
         if (structsArray->stan != 2) {
-            fprintf(fs, "%s;%d;%f\n", 
+            fprintf(filestream, "%s;%d;%f\n", 
             structsArray->nazwa, structsArray->ilosc, structsArray->wartosc);
 
             structsArray = structsArray + sizeof(JakasStruktura);
         }
     }
-    fclose(fs);
+    fclose(filestream);
     return 0;
+}
+
+void saveToFileManually(char* nazwa, int* ilosc, float* wartosc, FILE* stream) {
+    fprintf(stream, "%s;%d;%f\n", nazwa, *ilosc, *wartosc);
 }
