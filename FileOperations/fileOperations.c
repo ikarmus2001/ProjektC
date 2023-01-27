@@ -61,7 +61,7 @@ char* selectFile(GtkFileChooserAction action) {
         printf("Selecting file: Chosen file: %s\n", filename);
     }
 
-    gtk_widget_destroy (dialog);
+    gtk_widget_destroy(dialog);
     printf("Selecting file ended, file_chooser destroyed\n");
     return filename;
 }
@@ -136,7 +136,8 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, size_
         else
             failed++;  // TODO
     }
-    *rowsRead = fileLength - failed;
+    *rowsRead = j;
+    printf("rowsRead = %zd", *rowsRead);
     printf("Create struct from file: Finished creating, failed reading %zd / %zd lines\n", failed, fileLength);
     return js;
 }
@@ -196,6 +197,6 @@ char saveToFile(JakasStruktura* structsArray, size_t arrayLength) {
     return 0;
 }
 
-void saveToFileManually(char* nazwa, int* ilosc, float* wartosc, FILE* stream) {
-    fprintf(stream, "%s;%d;%f\n", nazwa, *ilosc, *wartosc);
+void saveToFileManually(char* nazwa, int ilosc, float wartosc, FILE* stream) {
+
 }

@@ -7,7 +7,7 @@ enum colNames {
   COL_COUNT
 };
 
-GtkWidget *nameEntry, *amountEntry, *valueEntry;
+GtkWidget *inputWindow, *nameEntry, *amountEntry, *valueEntry;
 
 /*
 Populates model with read data
@@ -15,12 +15,10 @@ Populates model with read data
 static GtkTreeModel* fill_model(JakasStruktura* js, size_t rowsRead) {
     GtkListStore* store = gtk_list_store_new(
         COL_COUNT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_FLOAT);
+    printf("rowsRead = %zd", rowsRead);
     
-    GtkTreeIter iter;
-    if (js == NULL) {
-        // gtk_list_store_append(store, &iter);
-    }
-    else {
+    if (js != NULL) {
+        GtkTreeIter iter;
         for (int i = 0; i < rowsRead; i++) {
             gtk_list_store_append(store, &iter);
             gtk_list_store_set(store, &iter, 
@@ -28,7 +26,7 @@ static GtkTreeModel* fill_model(JakasStruktura* js, size_t rowsRead) {
                 COL_ILOSC, js[i].ilosc, 
                 COL_WARTOSC, js[i].wartosc, 
                 -1);
-            printf("js[%d] = %s %d %f", i, js[i].nazwa, js[i].ilosc, js[i].wartosc);
+            printf("js[%d] = %s %d %f\n", i, js[i].nazwa, js[i].ilosc, js[i].wartosc);
         }
     }
     
@@ -67,36 +65,68 @@ GtkWidget* createNewTreeView(JakasStruktura* js, size_t rowsRead) {
 /*
 Retrieves data and creates new TreeView widget
 */
-GtkWidget* getNewData(unsigned char source) {
+GtkTreeModel* getNewData(unsigned char source) {
     JakasStruktura* js;
-    size_t rowsRead;
+    size_t* rowsRead = malloc(sizeof(size_t));
     unsigned char result;
-    js = readDatabase(source, &rowsRead);
+    js = readDatabase(source, rowsRead);
     
-    GtkWidget* newTreeView = createNewTreeView(js, rowsRead);
-    return newTreeView;
+    GtkWidget* newTreeView = createNewTreeView(js, *rowsRead);
+    
+    return gtk_tree_view_get_model(GTK_TREE_VIEW(newTreeView));
 }
 
-gboolean dataFromModel(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer data) {
+gboolean dataFromModel(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer fs) {
     char* nazwa;
-    int* ilosc;
-    float* wartosc;
-    gtk_tree_model_get (model, iter,
+    int ilosc;
+    float wartosc;
+    gtk_tree_model_get(model, iter,
                       COL_NAZWA, &nazwa,
                       COL_ILOSC, &ilosc,
                       COL_WARTOSC, &wartosc,
                       -1);
 
-    saveToFileManuallyLink(nazwa, ilosc, wartosc);
+    printf("nazwa = %s, ilosc = %d, wartosc = %f\n", nazwa, ilosc, wartosc);
+    saveToFileManuallyLink(nazwa, ilosc, wartosc, fs);
 
     return FALSE;
 }
 
-unsigned char getDataFromTreeView(GtkWidget* treeView, size_t* rowsRead) {
-    // *rowsRead = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(treeView)), NULL);
-    // JakasStruktura* js = malloc(rowsRead * sizeof(JakasStruktura));
-    gtk_tree_model_foreach(gtk_tree_view_get_model(GTK_TREE_VIEW(treeView)), dataFromModel, NULL);
 
+/*
+Just for fast testing
+*/
+char* selectF(GtkFileChooserAction action) {
+    GtkWidget* dialog;
+    char *filename = NULL;
+
+    dialog = gtk_file_chooser_dialog_new ("Open File",
+        NULL /*parentWindow*/, action, "Cancel", GTK_RESPONSE_CANCEL,
+        "Open", GTK_RESPONSE_ACCEPT, NULL);
+
+    printf("Selecting file: Setup file chooser\n");
+
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);    
+        filename = (char*)gtk_file_chooser_get_filename(chooser);
+        printf("Selecting file: Chosen file: %s\n", filename);
+    }
+
+    gtk_widget_destroy(dialog);
+    printf("Selecting file ended, file_chooser destroyed\n");
+    return filename;
+}
+
+unsigned char getDataFromTreeView(GtkWidget* treeView) {
+    char* filename = selectF(GTK_FILE_CHOOSER_ACTION_SAVE);
+    if (filename == NULL)
+        return -1;
+
+    FILE* filestream = fopen(filename, "a");
+
+    gtk_tree_model_foreach(gtk_tree_view_get_model(GTK_TREE_VIEW(treeView)), dataFromModel, filestream);
+    
+    fclose(filestream);
     return 0;
 }
 
@@ -104,8 +134,8 @@ unsigned char getDataFromTreeView(GtkWidget* treeView, size_t* rowsRead) {
 Retrieves data from existing TreeView and saves it to chosen destination
 */
 unsigned char saveData(unsigned char destination, GtkWidget* existingTreeView) {
-    size_t* rowsRead;
-    getDataFromTreeView(existingTreeView, rowsRead);
+    // printf("existingTreeView = %p", existingTreeView);
+    getDataFromTreeView(existingTreeView);
     // return saveDatabase(destination, dataToSave, rowsRead);
     return 0;
 }
@@ -128,9 +158,22 @@ static void addingAborted(GtkWidget* widget, gpointer entryWindow) {
     gtk_widget_destroy(entryWindow);
 }
 
+void deleteRow(GtkWidget* mainTreeView) {
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(mainTreeView));
+    GtkTreeModel* model;
+    GtkTreeIter iter;
+    if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+        gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+    }
+}
+
 void addRow(GtkWidget* mainTreeView) {
     
-    GtkWidget* inputWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    if (inputWindow != NULL) {
+        gtk_widget_destroy(inputWindow);
+    }
+    
+    inputWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     nameEntry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(nameEntry), "Nazwa");
