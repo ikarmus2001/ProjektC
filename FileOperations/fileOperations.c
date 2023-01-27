@@ -68,10 +68,9 @@ char* selectFile(GtkFileChooserAction action) {
 
 /* 
 Checks data integrity and creates structures,
-provides initiated and data-filled struct,
-Returns 0, on error 1
+provides initiated and data-filled struct
 */
-JakasStruktura* checkLine(char* str) {
+JakasStruktura* checkLine(char* str, size_t next_id) {
     char readString[100+1];
     int d1;
     float f1;
@@ -91,6 +90,7 @@ JakasStruktura* checkLine(char* str) {
         strcpy(newLine->nazwa, readString);
         newLine->ilosc = d1;
         newLine->wartosc = f1;
+        newLine->id = next_id;
         // printf("Checking line: Created newLine struct - nazwa: \"%s\", ilosc=%d, wartosc=%f\n", 
         //         newLine->nazwa, newLine->ilosc, newLine->wartosc);
         return newLine;
@@ -114,11 +114,11 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, size_
         char buffer[buffer_size];
         // printf("start pętli %zd\n", i);
         fgets(buffer, buffer_size, filestream);
-        if ((currentItem = checkLine(buffer)) != NULL) {
-            printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 
-                    currentItem->nazwa, 
-                    currentItem->ilosc, 
-                    currentItem->wartosc);
+        if ((currentItem = checkLine(buffer, j)) != NULL) {
+            // printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 
+            //         currentItem->nazwa, 
+            //         currentItem->ilosc, 
+            //         currentItem->wartosc);
             currentItem->id = j;
             currentItem->stan = 0;
 
@@ -158,14 +158,8 @@ JakasStruktura* getDataFromFile(size_t* rowsRead) {
     // JakasStruktura* js = malloc(fileLength * sizeof(JakasStruktura));
 
     structuresArray = createStructsFromFile(filestream, fileLength, rowsRead);
-    printf("created structures:");
-    printf("[0] %s, [14] %s\n", 
-            structuresArray[0].nazwa, 
-            structuresArray[14].nazwa);
 
     fclose(filestream);
-
-    // printf("readFromFile: Escaped, stream closed");
     return structuresArray;
 }
 
@@ -196,5 +190,5 @@ char saveToFile(JakasStruktura* structsArray, size_t arrayLength) {
 }
 
 void saveToFileManually(char* nazwa, int ilosc, float wartosc, FILE* stream) {
-
+    fprintf(stream, "%s;%d;%f\n", nazwa, ilosc, wartosc);
 }

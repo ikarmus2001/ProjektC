@@ -5,9 +5,9 @@
 #include "Structures/structures.h"
 #include "databaseOperations.h"
 
-GtkTreeModel* getNewData(unsigned char);
+GtkTreeModel* getNewDataFromSource(unsigned char);
 GtkWidget* createNewTreeView(JakasStruktura*, size_t);
-void addRow(GtkWidget*);
+void createAndShowAddRowEntry(GtkWidget*);
 unsigned char saveData(unsigned char, GtkWidget*);
 void searchItem(GtkWidget*);
 

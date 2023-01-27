@@ -38,7 +38,7 @@ GtkWidget* find_child(GtkWidget *parent, const gchar *name) {
 Reads data from file and swaps TreeView with new one
 */
 static void readFromFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
-    GtkTreeModel* model = getNewData(0);
+    GtkTreeModel* model = getNewDataFromSource(0);
     if (model == NULL)
         return;
     
@@ -49,13 +49,13 @@ static void readFromFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) 
 static void addItem_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
 
     GtkWidget* mainTreeView = find_child(menuHorizontalBox, "mainTreeView");
-    addRow(mainTreeView);
+    createAndShowAddRowEntry(mainTreeView);
 }
 
 static void removeItem_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
 
     GtkWidget* mainTreeView = find_child(menuHorizontalBox, "mainTreeView");
-    deleteRow(mainTreeView);
+    deleteSelectedRowFromTreeView(mainTreeView);
 }
 
 /*
@@ -127,6 +127,7 @@ void activate(GtkApplication* app, gpointer user_data) {
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), addItem_btn, 0, 0, 0);
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), removeItem_btn, 0, 0, 0);
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), saveToFile_btn, 0, 0, 0);
+    gtk_box_pack_start(GTK_BOX(menuVerticalBox), searchItem_btn, 0, 0, 0);
 
     addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, removeItem_btn, searchItem_btn, menuHorizontalBox);
 
