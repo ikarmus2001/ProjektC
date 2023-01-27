@@ -1,14 +1,15 @@
 #include "ViewController.h"
 
 enum colNames {
-  COL_NAZWA,
-  COL_ILOSC,
-  COL_WARTOSC,
-  COL_COUNT
+
+    COL_NAZWA,
+    COL_ILOSC,
+    COL_WARTOSC,
+    COL_COUNT
 };
 
 GtkWidget *inputWindow, *nameEntry, *amountEntry, *valueEntry, *searchEntry, *searchWindow;
-size_t* ids;
+size_t* ids, *maxIdsLength, matchLength;
 
 /*
 Populates model with read data
@@ -209,21 +210,47 @@ void addRow(GtkWidget* mainTreeView) {
 }
 
 gboolean compareNames(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer searchedName) {
+    SearchedString* target = (SearchedString *)searchedName;
     char* nazwa;
-    gtk_tree_model_get(model, iter, COL_NAZWA, &nazwa, -1);
+    gtk_tree_model_get(model, iter, COL_NAZWA, &nazwa, COL_ID -1);
+    size_t nameLen = strlen(nazwa);
+    size_t mostMatchingChars = 0;
+    size_t matching_chars = 0;
     
-    // TODO
-
-    // if ()
-    // for (int i = 0; i < strlen(nazwa); i++) {
-    //     if (nazwa[i] != searchedName[i]) {
-            
-    //         return TRUE;
-    //     }
-    // }
-
+    if (target->length > nameLen)
+        return FALSE;
+    
+    for (int i = 0; i < strlen(nazwa); i++) {
+        if (nazwa[i] != searchedName[i])
+            continue;
+        else 
+            for (int j = i; j < strlen(nazwa); j++) {
+                if (target->length <= j && nazwa[j] == searchedName[j]) {
+                    matching_chars += 1;
+                    continue;
+                }
+                if (matching_chars > mostMatchingChars) {
+                    mostMatchingChars = matching_chars;
+                }
+                break;
+            }
+            matching_chars = 0;
+        }
+    }
+    
+    if (matching_chars > matchLength)
+        // TODO 
     return FALSE;
 }
+
+/*
+Probably not the best way to do it, but it works
+*/
+gboolean countRows(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer maxIdsLength) {
+    *maxIdsLength += 1;
+    return FALSE;
+}
+
 
 void searchTreeView(GtkWidget* widget, gpointer mainTreeView) {
     SearchedString* searchedName = malloc(sizeof(SearchedString));
@@ -236,12 +263,16 @@ void searchTreeView(GtkWidget* widget, gpointer mainTreeView) {
     strcpy(searchedName->string, name);
     searchedName->string[strlen(name)] = '\0';
     searchedName->length = strlen(name);
+    searchedName->maxIdsLength = malloc(maxIdsLength * sizeof(size_t));
     gtk_tree_model_foreach(gtk_tree_view_get_model(GTK_TREE_VIEW(mainTreeView)), compareNames, searchedName);
-
-
 
     free(searchedName->string);
     free(searchedName);
+
+    if (ids)
+    openSearchResultsWindow();
+
+    
 }
 
 void searchItem(GtkWidget* mainTreeView) {
@@ -267,6 +298,7 @@ void searchItem(GtkWidget* mainTreeView) {
     gtk_box_pack_end(GTK_BOX(box), bottomBox, FALSE, FALSE, 0);
 
     g_signal_connect(searchButton, "clicked", G_CALLBACK(searchTreeView), mainTreeView);
+    gtk_tree_model_foreach(gtk_tree_view_get_model(GTK_TREE_VIEW(mainTreeView)), countRows, maxIdsLength);
     g_signal_connect(abortButton, "clicked", G_CALLBACK(addingAborted), searchWindow);
 
     gtk_container_add(GTK_CONTAINER(inputWindow), box);
