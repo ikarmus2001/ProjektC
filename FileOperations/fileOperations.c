@@ -85,7 +85,7 @@ JakasStruktura* checkLine(char* str) {
         JakasStruktura* newLine = malloc(sizeof(JakasStruktura));
         newLine->nazwa = malloc(strlen(readString) + 1);
         if (newLine->nazwa == NULL) {
-            printf("Mallocking failed\n\n");
+            printf("Memory allocation failed\n\n");
             return NULL;
         }
         strcpy(newLine->nazwa, readString);
@@ -109,12 +109,10 @@ JakasStruktura* createStructsFromFile(FILE* filestream, size_t fileLength, size_
     size_t failed = 0;
     size_t j = 0;
     unsigned int buffer_size = 500;
-    
-    // ERROR: Segfault somewhere here
 
     for (size_t i = 0; i < fileLength; i++) {
         char buffer[buffer_size];
-        printf("start pętli %zd\n", i);
+        // printf("start pętli %zd\n", i);
         fgets(buffer, buffer_size, filestream);
         if ((currentItem = checkLine(buffer)) != NULL) {
             printf("createStructsFromFile: STRUCT CHECKED, GOT %s, %d, %f \n", 

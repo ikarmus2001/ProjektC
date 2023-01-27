@@ -7,7 +7,8 @@ enum colNames {
   COL_COUNT
 };
 
-GtkWidget *inputWindow, *nameEntry, *amountEntry, *valueEntry;
+GtkWidget *inputWindow, *nameEntry, *amountEntry, *valueEntry, *searchEntry, *searchWindow;
+size_t* ids;
 
 /*
 Populates model with read data
@@ -70,6 +71,8 @@ GtkTreeModel* getNewData(unsigned char source) {
     size_t* rowsRead = malloc(sizeof(size_t));
     unsigned char result;
     js = readDatabase(source, rowsRead);
+    if (js == NULL)
+        return NULL;
     
     GtkWidget* newTreeView = createNewTreeView(js, *rowsRead);
     
@@ -86,7 +89,7 @@ gboolean dataFromModel(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter
                       COL_WARTOSC, &wartosc,
                       -1);
 
-    printf("nazwa = %s, ilosc = %d, wartosc = %f\n", nazwa, ilosc, wartosc);
+    // printf("nazwa = %s, ilosc = %d, wartosc = %f\n", nazwa, ilosc, wartosc);
     saveToFileManuallyLink(nazwa, ilosc, wartosc, fs);
 
     return FALSE;
@@ -202,6 +205,70 @@ void addRow(GtkWidget* mainTreeView) {
     gtk_box_pack_end(GTK_BOX(box), bottomBox, FALSE, FALSE, 0);
 
     gtk_container_add(GTK_CONTAINER(inputWindow), box);
+    gtk_widget_show_all(inputWindow);
+}
 
+gboolean compareNames(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer searchedName) {
+    char* nazwa;
+    gtk_tree_model_get(model, iter, COL_NAZWA, &nazwa, -1);
+    
+    // TODO
+
+    // if ()
+    // for (int i = 0; i < strlen(nazwa); i++) {
+    //     if (nazwa[i] != searchedName[i]) {
+            
+    //         return TRUE;
+    //     }
+    // }
+
+    return FALSE;
+}
+
+void searchTreeView(GtkWidget* widget, gpointer mainTreeView) {
+    SearchedString* searchedName = malloc(sizeof(SearchedString));
+    const char* name = gtk_entry_get_text(GTK_ENTRY(searchEntry));
+    searchedName->string = malloc(strlen(name) + 1);
+    if (searchedName->string == NULL) {
+        printf("Memory allocation failed\n\n");
+        return;
+    }
+    strcpy(searchedName->string, name);
+    searchedName->string[strlen(name)] = '\0';
+    searchedName->length = strlen(name);
+    gtk_tree_model_foreach(gtk_tree_view_get_model(GTK_TREE_VIEW(mainTreeView)), compareNames, searchedName);
+
+
+
+    free(searchedName->string);
+    free(searchedName);
+}
+
+void searchItem(GtkWidget* mainTreeView) {
+
+    if (searchWindow != NULL) {
+        gtk_widget_destroy(searchWindow);
+    }
+
+    searchWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+    searchEntry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(searchEntry), "Nazwa szukanego produktu");
+
+    GtkWidget* searchButton = gtk_button_new_with_label("Szukaj");
+    GtkWidget* abortButton = gtk_button_new_with_label("Anuluj");
+
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 50);
+    gtk_box_pack_start(GTK_BOX(box), searchEntry, FALSE, FALSE, 0);
+
+    GtkWidget* bottomBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
+    gtk_box_pack_end(GTK_BOX(bottomBox), abortButton, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(bottomBox), searchButton, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(box), bottomBox, FALSE, FALSE, 0);
+
+    g_signal_connect(searchButton, "clicked", G_CALLBACK(searchTreeView), mainTreeView);
+    g_signal_connect(abortButton, "clicked", G_CALLBACK(addingAborted), searchWindow);
+
+    gtk_container_add(GTK_CONTAINER(inputWindow), box);
     gtk_widget_show_all(inputWindow);
 }

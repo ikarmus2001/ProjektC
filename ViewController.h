@@ -9,5 +9,6 @@ GtkTreeModel* getNewData(unsigned char);
 GtkWidget* createNewTreeView(JakasStruktura*, size_t);
 void addRow(GtkWidget*);
 unsigned char saveData(unsigned char, GtkWidget*);
+void searchItem(GtkWidget*);
 
 #endif //VIEW_CONTROLLER_H

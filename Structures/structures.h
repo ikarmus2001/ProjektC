@@ -11,4 +11,11 @@ typedef struct cokolwiek {
     signed char stan;
 } JakasStruktura;
 
+typedef struct searchedString {
+    char* string;
+    size_t length;
+    size_t* ids;
+    size_t maxIdsLength;
+} SearchedString;
+
 #endif

@@ -39,18 +39,11 @@ Reads data from file and swaps TreeView with new one
 */
 static void readFromFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
     GtkTreeModel* model = getNewData(0);
-    printf("Got model");
-    printf("= %p\n", model);
-    GtkWidget* found = find_child(menuHorizontalBox, "mainTreeView");
-    printf("Found = ");
-    printf("%p\n", found);
-    // gtk_widget_destroy(found);
-
-    // gtk_box_pack_start(GTK_BOX(menuHorizontalBox), newTreeView, 0, 0, 0);
-    // gtk_widget_set_name(newTreeView, "mainTreeView");
-    // gtk_widget_show(mainTreeView);
-
-    gtk_tree_view_set_model(GTK_TREE_VIEW(found), model);
+    if (model == NULL)
+        return;
+    
+    GtkWidget* foundTreeView = find_child(menuHorizontalBox, "mainTreeView");
+    gtk_tree_view_set_model(GTK_TREE_VIEW(foundTreeView), model);
 }
 
 static void addItem_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
@@ -73,30 +66,22 @@ static void saveToFile_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
     saveData(0, mainTreeView);
 }
 
+static void searchItem_OnClick(GtkWidget *widget, gpointer menuHorizontalBox) {
+    GtkWidget* mainTreeView = find_child(menuHorizontalBox, "mainTreeView");
+    searchItem(mainTreeView);
+}
+
 /*
 Connects functions to event handlers
 */
 static void addEventSubscriptions(
-        GtkWidget* readFromFile_btn, 
-        GtkWidget* addItem_btn, 
-        GtkWidget* saveToFile_btn,
-        GtkWidget* removeItem_btn,
-        GtkWidget* menuHorizontalBox) {
-
-    printf("Connecting button handlers start\n");
-
+        GtkWidget* readFromFile_btn, GtkWidget* addItem_btn, GtkWidget* saveToFile_btn,
+        GtkWidget* removeItem_btn, GtkWidget* searchItem_btn, GtkWidget* menuHorizontalBox) {
     g_signal_connect(readFromFile_btn, "clicked", G_CALLBACK(readFromFile_OnClick), menuHorizontalBox);
-    // printf("After connecting onclick handler readFromFile\n");
-
     g_signal_connect(addItem_btn, "clicked", G_CALLBACK(addItem_OnClick), menuHorizontalBox);
-    // printf("After connecting onclick handler addItem_btn\n");
-
     g_signal_connect(removeItem_btn, "clicked", G_CALLBACK(removeItem_OnClick), menuHorizontalBox);
-
     g_signal_connect(saveToFile_btn, "clicked", G_CALLBACK(saveToFile_OnClick), menuHorizontalBox);
-    // printf("After connecting onclick handler saveToFile_btn\n");
-
-    printf("Connecting button handlers end\n");
+    g_signal_connect(searchItem_btn, "clicked", G_CALLBACK(searchItem_OnClick), menuHorizontalBox);
 }
 
 /*
@@ -129,10 +114,11 @@ void activate(GtkApplication* app, gpointer user_data) {
     gtk_widget_set_name(mainTreeView, "mainTreeView");
     // printf("mainTreeView adress = %p", mainTreeView);
 
-    GtkWidget* readFromFile_btn = gtk_button_new_with_label("Importuj");
-    GtkWidget* saveToFile_btn = gtk_button_new_with_label("Eksportuj");
+    GtkWidget* readFromFile_btn = gtk_button_new_with_label("Importuj bazę");
+    GtkWidget* saveToFile_btn = gtk_button_new_with_label("Eksportuj bazę");
     GtkWidget* addItem_btn = gtk_button_new_with_label("Dodaj produkt");
     GtkWidget* removeItem_btn = gtk_button_new_with_label("Usuń produkt");
+    GtkWidget* searchItem_btn = gtk_button_new_with_label("Znajdź produkt");
 
     //setupContainers();
     gtk_box_pack_start(GTK_BOX(menuHorizontalBox), mainTreeView, 0, 0, 0);
@@ -142,7 +128,7 @@ void activate(GtkApplication* app, gpointer user_data) {
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), removeItem_btn, 0, 0, 0);
     gtk_box_pack_start(GTK_BOX(menuVerticalBox), saveToFile_btn, 0, 0, 0);
 
-    addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, removeItem_btn, menuHorizontalBox);
+    addEventSubscriptions(readFromFile_btn, addItem_btn, saveToFile_btn, removeItem_btn, searchItem_btn, menuHorizontalBox);
 
     gtk_container_add(GTK_CONTAINER(window), menuHorizontalBox);
 
