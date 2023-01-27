@@ -14,3 +14,4 @@ example
 .vscode/settings.json
 .vs/ProjectSettings.json
 .vs
+CppProperties.json
